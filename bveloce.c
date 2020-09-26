@@ -3,6 +3,7 @@
 #include <limits.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "bveloce.h"
 
@@ -13,19 +14,20 @@ struct bv_bigint {
 
 size_t get_word_len_bits(void)
 {
-    static uintmax_t word_len_bits = 0;
-    static int done = 0;
+    static size_t word_len_bits = 0;
+    static bool done = false;
 
     if (done) {
         return word_len_bits;
     }
 
-    static uintmax_t n = UINTMAX_MAX;
-    while (n > 0) {
-        ++word_len_bits;
-        n >>= 1;
+    size_t w = 0;
+    for (uintmax_t n = UINTMAX_MAX; n > 0; n >>= 1) {
+        ++w;
     }
-    done = 1;
+    word_len_bits = w;
+    done = true;
+
     return word_len_bits;
 }
 
