@@ -1,6 +1,6 @@
 # preferred compiler
 CC = cc
-CFLAGS = -std=c17
+CFLAGS = -std=c17 -W -Wall -pedantic
 TEST_FLAG = -DBVELOCE_TEST__
 TEST_BIN = ./bveloce-test
 SRC = bveloce.c
