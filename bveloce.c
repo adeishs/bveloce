@@ -193,7 +193,6 @@ bv_bigint_type *bv_shr(bv_bigint_type *bv, const size_t n)
         *b >>= modl;
         *b |= i == u - 1 ? 0 : (*(b + 1) << modh);
     }
-    *b = 0;
 
     return bv;
 }
