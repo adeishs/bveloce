@@ -181,9 +181,6 @@ bv_bigint_type *bv_shr(bv_bigint_type *bv, const size_t n)
         return bv;
     }
 
-    printf("178: %016jx ", bv->words[1]);
-    printf("%016jx\n", bv->words[0]);
-
     size_t modl = n % word_len_bits;
     if (modl == 0) {
         return bv;
