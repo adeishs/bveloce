@@ -19,4 +19,4 @@ test: ${TEST_BIN}
 $(obj): %.o: %.c
 
 clean:
-	rm -f $(obj)
+	rm -f $(obj) ${TEST_BIN}
