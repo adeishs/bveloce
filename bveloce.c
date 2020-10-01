@@ -159,23 +159,40 @@ bv_bigint_type *bv_xor_bv(bv_bigint_type *bv1, const bv_bigint_type *bv2)
 bv_bigint_type *bv_shr(bv_bigint_type *bv, const size_t n)
 {
     size_t word_len_bits = get_word_len_bits();
+    uintmax_t *b = bv->words;
 
+    /* if shifting by more bits available, just zero out */
     if (n >= bv->word_count * word_len_bits) {
-        *bv->words = 0;
+        memset(b, 0, bv->word_count * sizeof *b);
         return bv;
     }
 
-    size_t m = n % word_len_bits;
     size_t w = n / word_len_bits;
     size_t u = bv->word_count - w;
-
-    memmove(bv->words, bv->words + w, u);
-    memset(bv->words + u, 0, w);
-
-    uintmax_t mask = UINTMAX_MAX >> m;
-    for (size_t i = 0; i < u; ++i) {
-        bv->words[i] = ((bv->words[i + 1] & mask) << m) | (bv->words[i] >> m);
+    size_t i = 0;
+    while (i < bv->word_count) {
+        *b = i++ < u ? *(b + w) : 0;
+        ++b;
     }
+
+    if (u == 0) {
+        return bv;
+    }
+
+    printf("178: %016jx ", bv->words[1]);
+    printf("%016jx\n", bv->words[0]);
+
+    size_t modl = n % word_len_bits;
+    if (modl == 0) {
+        return bv;
+    }
+
+    size_t modh = word_len_bits - modl;
+    for (i = 0, b = bv->words + w; i < u - 1; ++i, ++b) {
+        *b >>= modl;
+        *b |= *(b + 1) << modh;
+    }
+    *b = 0;
 
     return bv;
 }
@@ -220,14 +237,17 @@ int main(void)
         goto bail_out;
     }
 
-    if (!bv_set_word(bv, 0, UINTMAX_MAX)) {
+    if (!bv_set_word(bv, 0, UINTMAX_MAX)
+        || !bv_set_word(bv, 1, UINTMAX_MAX >> 2)) {
         fputs("Failed setting word\n", stderr);
         goto bail_out;
     }
 
-    printf("%ju\n", *bv_get_word(bv, 0));
-    bv_shr(bv, 64);
-    printf("%ju\n", *bv_get_word(bv, 0));
+    printf("%016jx ", *bv_get_word(bv, 1));
+    printf("%016jx\n", *bv_get_word(bv, 0));
+    bv_shr(bv, 63);
+    printf("%016jx ", *bv_get_word(bv, 1));
+    printf("%016jx\n", *bv_get_word(bv, 0));
 
     ret_val = EXIT_SUCCESS;
 
