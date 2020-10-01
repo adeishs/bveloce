@@ -172,9 +172,11 @@ bv_bigint_type *bv_shr(bv_bigint_type *bv, const size_t n)
     size_t w = n / word_len_bits;
     size_t u = bv->word_count - w;
     size_t i = 0;
-    while (i < bv->word_count) {
-        *b = i++ < u ? *(b + w) : 0;
-        ++b;
+    if (w > 0) {
+        while (i < bv->word_count) {
+            *b = i++ < u ? *(b + w) : 0;
+            ++b;
+        }
     }
 
     if (u == 0) {
@@ -187,9 +189,9 @@ bv_bigint_type *bv_shr(bv_bigint_type *bv, const size_t n)
     }
 
     size_t modh = word_len_bits - modl;
-    for (i = 0, b = bv->words + w; i < u - 1; ++i, ++b) {
+    for (i = 0, b = bv->words; i < u; ++i, ++b) {
         *b >>= modl;
-        *b |= *(b + 1) << modh;
+        *b |= i == u - 1 ? 0 : (*(b + 1) << modh);
     }
     *b = 0;
 
@@ -244,7 +246,7 @@ int main(void)
 
     printf("%016jx ", *bv_get_word(bv, 1));
     printf("%016jx\n", *bv_get_word(bv, 0));
-    bv_shr(bv, 63);
+    bv_shr(bv, 65);
     printf("%016jx ", *bv_get_word(bv, 1));
     printf("%016jx\n", *bv_get_word(bv, 0));
 
