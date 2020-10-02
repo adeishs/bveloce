@@ -141,6 +141,10 @@ bv_bigint_type *bv_xor_bv(bv_bigint_type *bv1, const bv_bigint_type *bv2)
 
 bv_bigint_type *bv_shr(bv_bigint_type *bv, const size_t n)
 {
+    if (n == 0) {
+        return bv;
+    }
+
     uintmax_t *b = bv->words;
 
     /* if shifting by more bits available, just zero out */
@@ -179,6 +183,10 @@ bv_bigint_type *bv_shr(bv_bigint_type *bv, const size_t n)
 
 bv_bigint_type *bv_shl(bv_bigint_type *bv, const size_t n)
 {
+    if (n == 0) {
+        return bv;
+    }
+
     size_t m = n % BV_WORD_LEN_BITS;
     size_t w = n / BV_WORD_LEN_BITS;
     size_t u = bv->word_count;
