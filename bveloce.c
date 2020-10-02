@@ -12,24 +12,7 @@ struct bv_bigint {
     uintmax_t *words;
 };
 
-size_t get_word_len_bits(void)
-{
-    static size_t word_len_bits = 0;
-    static bool done = false;
-
-    if (done) {
-        return word_len_bits;
-    }
-
-    size_t w = 0;
-    for (uintmax_t n = UINTMAX_MAX; n > 0; n >>= 1) {
-        ++w;
-    }
-    word_len_bits = w;
-    done = true;
-
-    return word_len_bits;
-}
+#define BV_WORD_LEN_BITS (sizeof(uintmax_t) * CHAR_BIT)
 
 bv_bigint_type *bv_create(void)
 {
@@ -160,16 +143,15 @@ bv_bigint_type *bv_xor_bv(bv_bigint_type *bv1, const bv_bigint_type *bv2)
 
 bv_bigint_type *bv_shr(bv_bigint_type *bv, const size_t n)
 {
-    size_t word_len_bits = get_word_len_bits();
     uintmax_t *b = bv->words;
 
     /* if shifting by more bits available, just zero out */
-    if (n >= bv->word_count * word_len_bits) {
+    if (n >= bv->word_count * BV_WORD_LEN_BITS) {
         memset(b, 0, bv->word_count * sizeof *b);
         return bv;
     }
 
-    size_t w = n / word_len_bits;
+    size_t w = n / BV_WORD_LEN_BITS;
     size_t u = bv->word_count - w;
     size_t i = 0;
     if (w > 0) {
@@ -183,12 +165,12 @@ bv_bigint_type *bv_shr(bv_bigint_type *bv, const size_t n)
         return bv;
     }
 
-    size_t modl = n % word_len_bits;
+    size_t modl = n % BV_WORD_LEN_BITS;
     if (modl == 0) {
         return bv;
     }
 
-    size_t modh = word_len_bits - modl;
+    size_t modh = BV_WORD_LEN_BITS - modl;
     for (i = 0, b = bv->words; i < u; ++i, ++b) {
         *b >>= modl;
         *b |= i == u - 1 ? 0 : (*(b + 1) << modh);
@@ -199,9 +181,8 @@ bv_bigint_type *bv_shr(bv_bigint_type *bv, const size_t n)
 
 bv_bigint_type *bv_shl(bv_bigint_type *bv, const size_t n)
 {
-    size_t word_len_bits = get_word_len_bits();
-    size_t m = n % word_len_bits;
-    size_t w = n / word_len_bits;
+    size_t m = n % BV_WORD_LEN_BITS;
+    size_t w = n / BV_WORD_LEN_BITS;
     size_t u = bv->word_count;
 
     if (!(bv_set_word(bv, bv->word_count + w + 1, 0))) {

@@ -5,7 +5,7 @@
 
 typedef struct bv_bigint bv_bigint_type;
 
-size_t get_word_num_of_bits(void);
+#define BV_WORD_LEN_BITS (sizeof(uintmax_t) * CHAR_BIT)
 
 bv_bigint_type *bv_create(void);
 
