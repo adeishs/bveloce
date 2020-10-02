@@ -12,8 +12,6 @@ struct bv_bigint {
     uintmax_t *words;
 };
 
-#define BV_WORD_LEN_BITS (sizeof(uintmax_t) * CHAR_BIT)
-
 bv_bigint_type *bv_create(void)
 {
     bv_bigint_type *new = malloc(sizeof *new);
